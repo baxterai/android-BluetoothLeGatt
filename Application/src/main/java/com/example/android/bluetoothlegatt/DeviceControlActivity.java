@@ -16,6 +16,7 @@
 
 package com.example.android.bluetoothlegatt;
 
+
 import android.app.Activity;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;

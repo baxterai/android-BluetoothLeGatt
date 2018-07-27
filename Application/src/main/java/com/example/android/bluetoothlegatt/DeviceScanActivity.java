@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
+
 package com.example.android.bluetoothlegatt;
+
+//https://stackoverflow.com/questions/33043582/bluetooth-low-energy-startscan-on-android-6-0-does-not-find-devices/33045489#33045489
+import android.Manifest;
+import android.os.Build;
+import android.util.Log;
 
 import android.app.Activity;
 import android.app.ListActivity;
@@ -51,8 +57,38 @@ public class DeviceScanActivity extends ListActivity {
     // Stops scanning after 10 seconds.
     private static final long SCAN_PERIOD = 10000;
 
+    //https://stackoverflow.com/questions/33043582/bluetooth-low-energy-startscan-on-android-6-0-does-not-find-devices/33045489#33045489
+    private static int PERMISSION_REQUEST_CODE = 1;
+    private final static String TAG = DeviceScanActivity.class.getSimpleName();
+
+    //https://stackoverflow.com/questions/33043582/bluetooth-low-energy-startscan-on-android-6-0-does-not-find-devices/33045489#33045489
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
+    {
+        if(requestCode == PERMISSION_REQUEST_CODE)
+        {
+            //Do something based on grantResults
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                Log.i(TAG, "coarse location permission granted");
+            }
+            else
+            {
+                Log.i(TAG, "coarse location permission denied");
+            }
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
+        Log.i(TAG, "requestPermissions:");
+        //https://stackoverflow.com/questions/33043582/bluetooth-low-energy-startscan-on-android-6-0-does-not-find-devices/33045489#33045489
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_CODE);
+        }
+
         super.onCreate(savedInstanceState);
         getActionBar().setTitle(R.string.title_devices);
         mHandler = new Handler();
