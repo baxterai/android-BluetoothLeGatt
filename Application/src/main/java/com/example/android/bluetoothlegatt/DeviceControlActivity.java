@@ -32,6 +32,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
@@ -39,6 +41,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+//ADDED;
+import java.util.UUID;
 
 /**
  * For a given BLE device, this Activity provides the user interface to connect, display data,
@@ -65,6 +69,9 @@ public class DeviceControlActivity extends Activity {
 
     private final String LIST_NAME = "NAME";
     private final String LIST_UUID = "UUID";
+
+    //ADDED;
+    private static BluetoothGattCharacteristic bluetoothGattCharacteristicHM_10;
 
     // Code to manage Service lifecycle.
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -173,6 +180,19 @@ public class DeviceControlActivity extends Activity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+
+        //ADDED;
+        final EditText mCommand = ((EditText) findViewById(R.id.writeDataText));
+        final Button mSend = ((Button) findViewById(R.id.writeDataButton));
+        mSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String val=mCommand.getText().toString();
+                bluetoothGattCharacteristicHM_10.setValue(val+"\n");
+                mBluetoothLeService.writeCharacteristic(bluetoothGattCharacteristicHM_10);
+                mBluetoothLeService.setCharacteristicNotification(bluetoothGattCharacteristicHM_10, true);
+            }
+        });
     }
 
     @Override
@@ -246,6 +266,10 @@ public class DeviceControlActivity extends Activity {
     // In this sample, we populate the data structure that is bound to the ExpandableListView
     // on the UI.
     private void displayGattServices(List<BluetoothGattService> gattServices) {
+
+        //ADDED;
+        UUID UUID_HM_10 = UUID.fromString(SampleGattAttributes.HM_10);
+
         if (gattServices == null) return;
         String uuid = null;
         String unknownServiceString = getResources().getString(R.string.unknown_service);
@@ -280,6 +304,12 @@ public class DeviceControlActivity extends Activity {
                         LIST_NAME, SampleGattAttributes.lookup(uuid, unknownCharaString));
                 currentCharaData.put(LIST_UUID, uuid);
                 gattCharacteristicGroupData.add(currentCharaData);
+
+                //ADDED;
+                if(uuid.equals(SampleGattAttributes.HM_10)){
+                    Log.i(TAG, "OnClickListener 10; HM10 uuid found, uuid = " + uuid);
+                    bluetoothGattCharacteristicHM_10 = gattService.getCharacteristic(UUID_HM_10);
+                }
             }
             mGattCharacteristics.add(charas);
             gattCharacteristicData.add(gattCharacteristicGroupData);
